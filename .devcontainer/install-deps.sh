@@ -51,7 +51,17 @@ sudo apt-get update && \
     sudo rm -rf /var/lib/apt/lists/*
 
 # Install buildkit from the latest rv1106-system GitHub release.
-BUILDKIT_URL="https://github.com/jetkvm/rv1106-system/releases/latest/download/kvm-native-buildkit.tar.zst"
+case "${BUILDKIT_VERSION}" in
+  "rockchip830")
+    BUILDKIT_URL="https://github.com/jetkvm/rv1106-system/releases/latest/download/kvm-native-buildkit.tar.zst"
+    ;;
+  "rockchip831")
+    BUILDKIT_URL="https://github.com/OpenNekoCloud/toolchain/releases/download/arm-rockchip831-linux-uclibcgnueabihf-buildkit/buildkit.tar.zst"
+    ;;
+  *)
+    exit 1
+    ;;
+esac
 BUILDKIT_TMPDIR="$(mktemp -d)"
 pushd "${BUILDKIT_TMPDIR}" > /dev/null
 

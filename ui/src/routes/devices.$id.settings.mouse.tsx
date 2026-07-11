@@ -216,33 +216,6 @@ export default function SettingsMouseRoute() {
         >
           <Checkbox checked={invertScroll} onChange={e => setInvertScroll(e.target.checked)} />
         </SettingsItem>
-
-        <SettingsItem title={m.mouse_jiggler_title()} description={m.mouse_jiggler_description()}>
-          <SelectMenuBasic
-            size="SM"
-            label=""
-            value={selectedJigglerOption || "disabled"}
-            options={[
-              ...jigglerOptions.map(option => ({
-                value: option.value,
-                label: option.label,
-              })),
-              { value: "custom", label: m.mouse_jiggler_custom() },
-            ]}
-            onChange={e => {
-              handleJigglerChange(e.target.value as (typeof jigglerOptions)[number]["value"]);
-            }}
-          />
-        </SettingsItem>
-
-        {selectedJigglerOption === "custom" && (
-          <SettingsNestedSection>
-            <JigglerSetting
-              onSave={saveJigglerConfig}
-              defaultJigglerState={currentJigglerConfig || undefined}
-            />
-          </SettingsNestedSection>
-        )}
         <div className="space-y-4">
           <SettingsItem title={m.mouse_modes_title()} description={m.mouse_modes_description()} />
           <div className="flex items-center gap-4">

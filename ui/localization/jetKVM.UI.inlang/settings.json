@@ -1,38 +1,18 @@
 {
   "$schema": "https://inlang.com/schema/project-settings",
-  "baseLocale": "en",
+  "baseLocale": "zh",
   "sourceLanguageTag": "en",
   "locales": [
-    "en",
-    "cy",
-    "da",
-    "de",
-    "es",
-    "fr",
-    "it",
-    "ja",
-    "nb",
-    "pt",
-    "ru",
-    "sv",
+    "zh",
     "zh-tw",
-    "zh"
+    "en",
+    "ja"
   ],
   "languageTags": [
-    "en",
-    "cy",
-    "da",
-    "de",
-    "es",
-    "fr",
-    "it",
-    "ja",
-    "nb",
-    "pt",
-    "ru",
-    "sv",
+    "zh",
     "zh-tw",
-    "zh"
+    "en",
+    "ja"
   ],
   "modules": [
     "https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",

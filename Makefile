@@ -2,8 +2,8 @@ BRANCH    := $(shell git rev-parse --abbrev-ref HEAD)
 BUILDDATE := $(shell date -u +%FT%T%z)
 BUILDTS   := $(shell date -u +%s)
 REVISION  := $(shell git rev-parse HEAD)
-VERSION := 0.5.9
-VERSION_DEV := $(VERSION)-dev$(shell date -u +%Y%m%d%H%M)
+VERSION := $(shell date -u +%y.%1m.%d)
+VERSION_DEV := $(VERSION)
 
 # SKUs the app binary must be published under in R2. The binary is currently
 # identical across SKUs but the cloud-api releases endpoint resolves
@@ -14,7 +14,7 @@ APP_SKUS := jetkvm-v2 jetkvm-v2-sdmmc
 PROMETHEUS_TAG := github.com/prometheus/common/version
 KVM_PKG_NAME := github.com/jetkvm/kvm
 
-BUILDKIT_FLAVOR := arm-rockchip830-linux-uclibcgnueabihf
+BUILDKIT_FLAVOR := arm-$(BUILDKIT_VERSION)-linux-uclibcgnueabihf
 BUILDKIT_PATH ?= /opt/jetkvm-native-buildkit
 DOCKER_BUILD_TAG ?= ghcr.io/jetkvm/buildkit:latest
 SKIP_NATIVE_IF_EXISTS ?= 0

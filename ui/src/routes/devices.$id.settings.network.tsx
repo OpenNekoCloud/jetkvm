@@ -504,20 +504,6 @@ export default function SettingsNetworkRoute() {
               {timeSyncMode === "custom" && <CustomTimeSyncCard />}
 
               <SettingsItem
-                title={m.network_dhcp_client_title()}
-                description={m.network_dhcp_client_description()}
-              >
-                <SelectMenuBasic
-                  size="SM"
-                  options={[
-                    { value: "jetdhcpc", label: m.network_dhcp_client_jetkvm() },
-                    { value: "udhcpc", label: "udhcpc" }, // do not localize
-                  ]}
-                  {...register("dhcp_client")}
-                />
-              </SettingsItem>
-
-              <SettingsItem
                 title={m.network_ipv4_mode_title()}
                 description={m.network_ipv4_mode_description()}
               >

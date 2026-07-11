@@ -20,18 +20,6 @@ interface Extension {
 
 const AVAILABLE_EXTENSIONS: Extension[] = [
   {
-    id: "atx-power",
-    name: m.extensions_atx_power_control(),
-    description: m.extensions_atx_power_control_description(),
-    icon: LuPower,
-  },
-  {
-    id: "dc-power",
-    name: m.extensions_dc_power_control(),
-    description: m.extensions_dc_power_control(),
-    icon: LuPlugZap,
-  },
-  {
     id: "serial-console",
     name: m.extension_serial_console(),
     description: m.extension_serial_console_description(),

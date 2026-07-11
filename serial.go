@@ -8,14 +8,13 @@ import (
 	"strconv"
 	"strings"
 	"sync/atomic"
-	"time"
 
 	"github.com/jetkvm/kvm/internal/sync"
 	"github.com/pion/webrtc/v4"
 	"go.bug.st/serial"
 )
 
-const serialPortPath = "/dev/ttyS3"
+const serialPortPath = "/dev/ttyS0"
 
 var port serial.Port
 var serialMux *SerialMux
@@ -94,48 +93,6 @@ func runATXControl() {
 			btnPWRState = newBtnPWRState
 		}
 	}
-}
-
-func pressATXPowerButton(duration time.Duration) error {
-	_, err := port.Write([]byte("\n"))
-	if err != nil {
-		return err
-	}
-
-	_, err = port.Write([]byte("BTN_PWR_ON\n"))
-	if err != nil {
-		return err
-	}
-
-	time.Sleep(duration)
-
-	_, err = port.Write([]byte("BTN_PWR_OFF\n"))
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func pressATXResetButton(duration time.Duration) error {
-	_, err := port.Write([]byte("\n"))
-	if err != nil {
-		return err
-	}
-
-	_, err = port.Write([]byte("BTN_RST_ON\n"))
-	if err != nil {
-		return err
-	}
-
-	time.Sleep(duration)
-
-	_, err = port.Write([]byte("BTN_RST_OFF\n"))
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func mountDCControl() error {

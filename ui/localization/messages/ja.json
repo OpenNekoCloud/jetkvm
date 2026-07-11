@@ -1002,7 +1002,7 @@
     "usb_device_enable_serial_console_title": "USBシリアルコンソールを有効化",
     "usb_device_failed_load": "USBデバイスの読み込みに失敗しました: {error}",
     "usb_device_failed_set": "USBデバイスの設定に失敗しました: {error}",
-    "usb_device_keyboard_mouse_mass_storage_and_audio": "キーボード、マウス、マスストレージ、オーディオ",
+    "usb_device_keyboard_mouse_and_mass_storage": "キーボード、マウス、マスストレージ",
     "usb_device_keyboard_only": "キーボードのみ",
     "usb_device_restore_default": "デフォルトに戻す",
     "usb_device_title": "USBデバイス",

@@ -82,6 +82,7 @@ func initJiggler() {
 }
 
 func runJigglerCronTab() error {
+	return nil
 	cronTab := config.JigglerConfig.ScheduleCronTab
 
 	// Apply timezone if specified and valid

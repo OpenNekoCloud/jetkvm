@@ -44,7 +44,7 @@ func (d *Diagnostics) LogI2CInfo() {
 	}
 
 	// HDMI capture chip sleep_mode
-	sleepModePath := "/sys/devices/platform/ff470000.i2c/i2c-4/4-000f/sleep_mode"
+	sleepModePath := "/sys/devices/platform/ff460000.i2c/i2c-3/3-000f/sleep_mode"
 	d.readFileLog("HDMI sleep_mode", sleepModePath)
 }
 

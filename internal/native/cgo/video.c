@@ -29,7 +29,7 @@
 
 #define VIDEO_DEV "/dev/video0"
 #define SUB_DEV "/dev/v4l-subdev2"
-#define SLEEP_MODE_FILE "/sys/devices/platform/ff470000.i2c/i2c-4/4-000f/sleep_mode"
+#define SLEEP_MODE_FILE "/sys/devices/platform/ff460000.i2c/i2c-3/3-000f/sleep_mode"
 
 #define RK_ALIGN(x, a) (((x) + (a)-1) & ~((a)-1))
 #define RK_ALIGN_2(x) RK_ALIGN(x, 2)
@@ -95,7 +95,7 @@ static void detect_sleep_mode()
 
 double calculate_bitrate(float bitrate_factor, int width, int height)
 {
-    const int32_t base_bitrate_high = 4000;
+    const int32_t base_bitrate_high = 8000;
     const int32_t base_bitrate_low = 512;
 
     double pixels = (double)width * height;

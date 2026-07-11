@@ -165,10 +165,10 @@ func openCaptureWithBackoff(ctx context.Context) (*audio.ALSACapture, error) {
 
 // alsaCaptureDevice returns the ALSA device for the UAC1 gadget card.
 func alsaCaptureDevice() string {
-	if card, ok := findALSACard("UAC1Gadget"); ok {
+	if card, ok := findALSACard("tc358743"); ok {
 		return "hw:" + strconv.Itoa(card) + ",0"
 	}
-	return "hw:1,0"
+	return "hw:0,0"
 }
 
 func findALSACard(cardID string) (int, bool) {

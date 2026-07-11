@@ -4,6 +4,8 @@ FROM --platform=${BUILDPLATFORM} golang:1.25.1-trixie AS builder
 ENV GOTOOLCHAIN=local
 ENV GOPATH=/go
 ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
+ARG BUILDKIT_VERSION
+ENV BUILDKIT_VERSION=${BUILDKIT_VERSION}
 
 COPY install-deps.sh /install-deps.sh
 RUN /install-deps.sh

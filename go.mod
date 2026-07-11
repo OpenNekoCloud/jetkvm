@@ -35,6 +35,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/vearutop/statigz v1.5.0
 	github.com/vishvananda/netlink v1.3.1
+	github.com/warthog618/go-gpiocdev v0.9.1
 	go.bug.st/serial v1.6.4
 	golang.org/x/crypto v0.43.0
 	golang.org/x/net v0.46.0

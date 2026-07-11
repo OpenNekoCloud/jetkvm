@@ -130,23 +130,6 @@ export default function SettingsHardwareRoute() {
       <SettingsPageHeader title={m.hardware_title()} description={m.hardware_page_description()} />
       <div className="space-y-4">
         <SettingsItem
-          title={m.hardware_display_orientation_title()}
-          description={m.hardware_display_orientation_description()}
-        >
-          <SelectMenuBasic
-            size="SM"
-            label=""
-            value={settings.displayRotation.toString()}
-            options={[
-              { value: "270", label: m.hardware_display_orientation_normal() },
-              { value: "90", label: m.hardware_display_orientation_inverted() },
-            ]}
-            onChange={e => {
-              handleDisplayRotationChange(e.target.value);
-            }}
-          />
-        </SettingsItem>
-        <SettingsItem
           title={m.hardware_display_brightness_title()}
           description={m.hardware_display_brightness_description()}
         >
@@ -156,8 +139,6 @@ export default function SettingsHardwareRoute() {
             value={backlightSettings.max_brightness.toString()}
             options={[
               { value: "0", label: m.hardware_display_brightness_off() },
-              { value: "10", label: m.hardware_display_brightness_low() },
-              { value: "35", label: m.hardware_display_brightness_medium() },
               { value: "64", label: m.hardware_display_brightness_high() },
             ]}
             onChange={e => {
@@ -165,54 +146,6 @@ export default function SettingsHardwareRoute() {
             }}
           />
         </SettingsItem>
-        {backlightSettings.max_brightness != 0 && (
-          <NestedSettingsGroup>
-            <SettingsItem
-              title={m.hardware_dim_display_after_title()}
-              description={m.hardware_dim_display_after_description()}
-            >
-              <SelectMenuBasic
-                size="SM"
-                label=""
-                value={backlightSettings.dim_after.toString()}
-                options={[
-                  { value: "0", label: m.hardware_time_never() },
-                  { value: "60", label: m.hardware_time_1_minute() },
-                  { value: "300", label: m.hardware_time_5_minutes() },
-                  { value: "600", label: m.hardware_time_10_minutes() },
-                  { value: "1800", label: m.hardware_time_30_minutes() },
-                  { value: "3600", label: m.hardware_time_1_hour() },
-                ]}
-                onChange={e => {
-                  handleBacklightDimAfterChange(Number.parseInt(e.target.value));
-                }}
-              />
-            </SettingsItem>
-            <SettingsItem
-              title={m.hardware_turn_off_display_after_title()}
-              description={m.hardware_turn_off_display_after_description()}
-            >
-              <SelectMenuBasic
-                size="SM"
-                label=""
-                value={backlightSettings.off_after.toString()}
-                options={[
-                  { value: "0", label: m.hardware_time_never() },
-                  { value: "300", label: m.hardware_time_5_minutes() },
-                  { value: "600", label: m.hardware_time_10_minutes() },
-                  { value: "1800", label: m.hardware_time_30_minutes() },
-                  { value: "3600", label: m.hardware_time_1_hour() },
-                ]}
-                onChange={e => {
-                  handleBacklightOffAfterChange(Number.parseInt(e.target.value));
-                }}
-              />
-            </SettingsItem>
-          </NestedSettingsGroup>
-        )}
-        <p className="text-xs text-slate-600 dark:text-slate-400">
-          {m.hardware_display_wake_up_note()}
-        </p>
       </div>
 
       <FeatureFlag minAppVersion="0.4.9">

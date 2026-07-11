@@ -114,27 +114,6 @@ export default function SettingsGeneralRoute() {
                 </>
               }
             />
-            <div className="flex items-center justify-start gap-x-2">
-              <Button
-                size="SM"
-                theme="light"
-                text={m.general_check_for_updates()}
-                onClick={() => navigateTo("./update")}
-              />
-            </div>
-          </div>
-          <div className="space-y-4">
-            <SettingsItem
-              title={m.general_auto_update_title()}
-              description={m.general_auto_update_description()}
-            >
-              <Checkbox
-                checked={autoUpdate}
-                onChange={e => {
-                  handleAutoUpdateChange(e.target.checked);
-                }}
-              />
-            </SettingsItem>
           </div>
           <div className="mt-2 flex items-center justify-between gap-x-2">
             <SettingsItem

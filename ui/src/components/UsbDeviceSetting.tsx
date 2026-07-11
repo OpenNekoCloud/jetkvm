@@ -40,7 +40,7 @@ const defaultUsbDeviceConfig: UsbDeviceConfig = {
 
 const usbPresets = [
   {
-    label: m.usb_device_keyboard_mouse_mass_storage_and_audio(),
+    label: m.usb_device_keyboard_mouse_and_mass_storage(),
     value: "default",
     config: {
       keyboard: true,
@@ -48,7 +48,7 @@ const usbPresets = [
       relative_mouse: true,
       mass_storage: true,
       serial_console: false,
-      audio: true,
+      audio: false,
     },
   },
   {

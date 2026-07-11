@@ -6,7 +6,7 @@ import { useDeviceUiNavigation } from "@hooks/useAppNavigation";
 import { JsonRpcResponse, useJsonRpc } from "@hooks/useJsonRpc";
 import { GridCard } from "@components/Card";
 import { Button, LinkButton } from "@components/Button";
-import { InputFieldWithLabel } from "@components/InputField";
+import InputField, { InputFieldWithLabel } from "@components/InputField";
 import { SelectMenuBasic } from "@components/SelectMenuBasic";
 import { SettingsItem } from "@components/SettingsItem";
 import { SettingsPageHeader } from "@components/SettingsPageheader";
@@ -21,6 +21,8 @@ import { m } from "@localizations/messages.js";
 
 import { LocalDevice } from "./devices.$id";
 import { CloudState } from "./adopt";
+import AutoHeight from "@components/AutoHeight.tsx";
+import { LuRefreshCcw } from "react-icons/lu";
 
 export interface TLSState {
   mode: "self-signed" | "custom" | "disabled";
@@ -46,6 +48,14 @@ export default function SettingsAccessIndexRoute() {
 
   const { send } = useJsonRpc();
 
+  const [easyTierState, setEasyTierState] = useState({ easyTierServiceState: false, easyTierPublicServerState: false });
+  const [easyTierEnabled, setEasyTierEnabled] = useState(false);
+  const [easyTierPublicServer, setEasyTierPublicServer] = useState("");
+  const [easyTierNetworkName, setEasyTierNetworkName] = useState("");
+  const [easyTierNetworkSecret, setEasyTierNetworkSecret] = useState("");
+  const [easyTierVirtualIPv4, setEasyTierVirtualIPv4] = useState("");
+  const [easyTierVirtualHostname, setEasyTierVirtualHostname] = useState("");
+  const [easyTierSubnetProxyCIDR, setEasyTierSubnetProxyCIDR] = useState("");
   const [isAdopted, setAdopted] = useState(false);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [cloudApiUrl, setCloudApiUrl] = useState("");
@@ -56,6 +66,28 @@ export default function SettingsAccessIndexRoute() {
   const [tlsMode, setTlsMode] = useState<string>("unknown");
   const [tlsCert, setTlsCert] = useState<string>("");
   const [tlsKey, setTlsKey] = useState<string>("");
+
+  const getEasyTierState = useCallback(() => {
+    send("getEasyTierState", {}, (resp: JsonRpcResponse) => {
+      if ("error" in resp) return console.error(resp.error);
+      const easyTierState = resp.result as { easyTierServiceState: boolean; easyTierPublicServerState: boolean; };
+      setEasyTierState(easyTierState);
+    });
+  }, [send]);
+
+  const getEasyTierConfig = useCallback(() => {
+    send("getEasyTierConfig", {}, (resp: JsonRpcResponse) => {
+      if ("error" in resp) return console.error(resp.error);
+      const easyTierConfig = resp.result as { easyTierEnabled: boolean; easyTierPublicServer: string; easyTierNetworkName: string; easyTierNetworkSecret: string; easyTierVirtualIPv4: string; easyTierVirtualHostname: string; easyTierSubnetProxyCIDR: string };
+      setEasyTierEnabled(easyTierConfig.easyTierEnabled);
+      setEasyTierPublicServer(easyTierConfig.easyTierPublicServer);
+      setEasyTierNetworkName(easyTierConfig.easyTierNetworkName);
+      setEasyTierNetworkSecret(easyTierConfig.easyTierNetworkSecret);
+      setEasyTierVirtualIPv4(easyTierConfig.easyTierVirtualIPv4);
+      setEasyTierVirtualHostname(easyTierConfig.easyTierVirtualHostname);
+      setEasyTierSubnetProxyCIDR(easyTierConfig.easyTierSubnetProxyCIDR);
+    });
+  }, [send]);
 
   const getCloudState = useCallback(() => {
     send("getCloudState", {}, (resp: JsonRpcResponse) => {
@@ -88,6 +120,29 @@ export default function SettingsAccessIndexRoute() {
       if (tlsState.privateKey) setTlsKey(tlsState.privateKey);
     });
   }, [send]);
+
+  const setEasyTierConfig = useCallback((enabled: boolean) => {
+    send("setEasyTierConfig", {
+      easyTierEnabled: enabled,
+      easyTierPublicServer: easyTierPublicServer,
+      easyTierNetworkName: easyTierNetworkName,
+      easyTierNetworkSecret: easyTierNetworkSecret,
+      easyTierVirtualIPv4: easyTierVirtualIPv4,
+      easyTierVirtualHostname: easyTierVirtualHostname,
+      easyTierSubnetProxyCIDR: easyTierSubnetProxyCIDR,
+    }, (resp: JsonRpcResponse) => {
+      if ("error" in resp) {
+        notifications.error(
+          m.access_failed_update_easytier({ error: resp.error.data || m.unknown_error() }),
+        );
+        return;
+      }
+
+      notifications.success(m.access_easytier_config_updated());
+      getEasyTierConfig();
+      getEasyTierState();
+    });
+  }, [send, easyTierPublicServer, easyTierNetworkName, easyTierNetworkSecret, easyTierVirtualIPv4, easyTierVirtualHostname, easyTierSubnetProxyCIDR]);
 
   const deregisterDevice = () => {
     send("deregisterDevice", {}, (resp: JsonRpcResponse) => {
@@ -194,6 +249,8 @@ export default function SettingsAccessIndexRoute() {
 
   // Fetch device ID and cloud state on component mount
   useEffect(() => {
+    getEasyTierState();
+    getEasyTierConfig();
     getCloudState();
     getTLSState();
 
@@ -201,7 +258,7 @@ export default function SettingsAccessIndexRoute() {
       if ("error" in resp) return console.error(resp.error);
       setDeviceId(resp.result as string);
     });
-  }, [send, getCloudState, getTLSState]);
+  }, [send, getEasyTierState, getEasyTierConfig, getCloudState, getTLSState]);
 
   return (
     <div className="space-y-4">
@@ -314,6 +371,163 @@ export default function SettingsAccessIndexRoute() {
           <div className="h-px w-full bg-slate-800/10 dark:bg-slate-300/20" />
         </>
       )}
+
+      <div className="space-y-4">
+        <SettingsSectionHeader title="EasyTier 异地组网" description={m.access_easytier_description()} />
+
+        <div>
+          <AutoHeight>
+              <GridCard>
+                <div className="animate-fadeIn p-4 text-black opacity-0 animation-duration-500 dark:text-white">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                        {m.access_easytier_state_title()}
+                      </h3>
+
+                      <div>
+                        <Button
+                          size="XS"
+                          theme="light"
+                          type="button"
+                          className="text-red-500"
+                          text={m.access_easytier_state_refresh()}
+                          LeadingIcon={LuRefreshCcw}
+                          onClick={() => getEasyTierState()}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-x-6 gap-y-2">
+                      <div className="flex-1 space-y-2">
+                        <div className="flex justify-between border-slate-800/10 pt-2 dark:border-slate-300/20">
+                          <span className="text-sm text-slate-600 dark:text-slate-400">
+                            {m.access_easytier_state_service()}
+                          </span>
+                          &nbsp;
+                          <span className="text-sm font-medium">{easyTierState.easyTierServiceState ? m.access_easytier_service_running() : m.access_easytier_service_stopped()}</span>
+                        </div>
+
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <div className="flex justify-between border-slate-800/10 pt-2 dark:border-slate-300/20">
+                          <span className="text-sm text-slate-600 dark:text-slate-400">
+                            {m.access_easytier_state_public_server()}
+                          </span>
+                          &nbsp;
+                          <span className="text-sm font-medium">{easyTierState.easyTierPublicServerState ? m.access_easytier_public_server_connected() : m.access_easytier_public_server_disconnected()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </GridCard>
+          </AutoHeight>
+        </div>
+
+        <div className="space-y-4">
+          <SettingsItem
+            title={m.access_easytier_public_server_title()}
+            description={m.access_easytier_public_server_description()}
+          >
+            <InputField
+              size="SM"
+              disabled={easyTierEnabled}
+              placeholder={"tcp://et1.armkvm.top:21010"}
+              value={easyTierPublicServer}
+              onChange={e => setEasyTierPublicServer(e.target.value)}
+            />
+          </SettingsItem>
+          <SettingsItem
+            title={m.access_easytier_network_name_title()}
+            description={m.access_easytier_network_name_description()}
+          >
+            <InputField
+              size="SM"
+              disabled={easyTierEnabled}
+              placeholder={"default"}
+              value={easyTierNetworkName}
+              onChange={e => setEasyTierNetworkName(e.target.value)}
+            />
+          </SettingsItem>
+          <SettingsItem
+            title={m.access_easytier_network_secret_title()}
+            description={m.access_easytier_network_secret_description()}
+          >
+            <InputField
+              size="SM"
+              disabled={easyTierEnabled}
+              placeholder={"password"}
+              value={easyTierNetworkSecret}
+              onChange={e => setEasyTierNetworkSecret(e.target.value)}
+            />
+          </SettingsItem>
+          <SettingsItem
+            title={m.access_easytier_virtual_ipv4_title()}
+            description={m.access_easytier_virtual_ipv4_description()}
+          >
+            <InputField
+              size="SM"
+              disabled={easyTierEnabled}
+              placeholder={"192.168.0.100/24"}
+              value={easyTierVirtualIPv4}
+              onChange={e => setEasyTierVirtualIPv4(e.target.value)}
+            />
+          </SettingsItem>
+          <SettingsItem
+            title={m.access_easytier_virtual_hostname_title()}
+            description={m.access_easytier_virtual_hostname_description()}
+          >
+            <InputField
+              size="SM"
+              disabled={easyTierEnabled}
+              placeholder={"hostname"}
+              value={easyTierVirtualHostname}
+              onChange={e => setEasyTierVirtualHostname(e.target.value)}
+            />
+          </SettingsItem>
+          <SettingsItem
+            title={m.access_easytier_subnet_proxy_cidr_title()}
+            description={m.access_easytier_subnet_proxy_cidr_description()}
+          >
+            <InputField
+              size="SM"
+              disabled={easyTierEnabled}
+              placeholder={"192.168.0.0/24"}
+              value={easyTierSubnetProxyCIDR}
+              onChange={e => setEasyTierSubnetProxyCIDR(e.target.value)}
+            />
+          </SettingsItem>
+
+          {!easyTierEnabled ? (
+            <div className="flex items-end gap-x-2">
+              <Button
+                size="SM"
+                theme="primary"
+                text={m.access_adopt_kvm()}
+                onClick={() => setEasyTierConfig(true)}
+              />
+            </div>
+          ) : (
+            <div>
+              <div className="space-y-2">
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  {m.access_adopted_message()}
+                </p>
+                <div>
+                  <Button
+                    size="SM"
+                    theme="light"
+                    text={m.access_deregister()}
+                    className="text-red-600"
+                    onClick={() => setEasyTierConfig(false)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="h-px w-full bg-slate-800/10 dark:bg-slate-300/20" />
+      </div>
 
       <div className="space-y-4">
         <SettingsSectionHeader title="Remote" description={m.access_remote_description()} />

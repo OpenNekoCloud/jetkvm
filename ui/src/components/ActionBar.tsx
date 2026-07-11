@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useRef } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { MdOutlineContentPasteGo } from "react-icons/md";
 import {
   LuCable,
@@ -10,6 +10,7 @@ import {
   LuSignal,
   LuTerminal,
   LuX,
+  LuPower,
 } from "react-icons/lu";
 import { FaKeyboard } from "react-icons/fa6";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
@@ -34,6 +35,14 @@ import MountPopopover from "@components/popovers/MountPopover";
 import ExtensionPopover from "@components/popovers/ExtensionPopover";
 import { JsonRpcResponse, useJsonRpc } from "@hooks/useJsonRpc";
 import { m } from "@localizations/messages.js";
+import notifications from "@/notifications";
+import { ATXPowerControl } from "@components/extensions/ATXPowerControl";
+import { GridCard } from "@components/Card.tsx";
+
+interface ATXState {
+  power: boolean;
+  hdd: boolean;
+}
 
 export default function Actionbar({
   requestFullscreen,
@@ -55,10 +64,23 @@ export default function Actionbar({
   } = useUiStore();
   const { remoteVirtualMediaState } = useMountMediaStore();
   const { width: videoWidth, height: videoHeight } = useVideoStore();
-  const { developerMode } = useSettingsStore();
-  const { send } = useJsonRpc();
+  const { developerMode } = { developerMode: true };
+  const [atxState, setAtxState] = useState<ATXState | null>(null);
+  const { send } = useJsonRpc(function onRequest(resp) {
+    if (resp.method === "atxState") {
+      setAtxState(resp.params as ATXState);
+    }
+  });
 
   useEffect(() => {
+    send("getATXState", {}, (resp: JsonRpcResponse) => {
+      if ("error" in resp) {
+        notifications.error(m.atx_power_control_get_state_error({ error: resp.error.data || m.unknown_error() }));
+        return;
+      }
+      setAtxState(resp.result as ATXState);
+    });
+
     send("getUsbDevices", {}, (resp: JsonRpcResponse) => {
       if ("error" in resp) return;
       const devices = resp.result as { serial_console?: boolean };
@@ -272,6 +294,69 @@ export default function Actionbar({
         </div>
 
         <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
+          <div>
+            <LuPower
+              strokeWidth={3}
+              className={`mr-1 inline ${
+                atxState?.power ? "text-green-600" : "text-slate-300"
+              }`}
+            />
+          </div>
+          <div>
+            <LuHardDrive
+              strokeWidth={3}
+              className={`mr-1 inline ${
+                atxState?.hdd ? "text-blue-400" : "text-slate-300"
+              }`}
+            />
+          </div>
+          <Popover>
+            <PopoverButton as={Fragment}>
+              <Button
+                size="XS"
+                theme="light"
+                text={m.extensions_atx_power_control()}
+                LeadingIcon={LuPower}
+                onClick={() => {
+                  setDisableVideoFocusTrap(true);
+                }}
+              />
+            </PopoverButton>
+            <PopoverPanel
+              anchor="bottom start"
+              transition
+              className={cx(
+                "z-10 flex w-[420px] flex-col overflow-visible!",
+                "flex origin-top flex-col transition duration-300 ease-out data-closed:translate-y-8 data-closed:opacity-0",
+              )}
+            >
+              {({ open }) => {
+                checkIfStateChanged(open);
+                return (
+                  <GridCard>
+                    <div className="space-y-4 p-4 py-3">
+                      <div className="grid h-full grid-rows-(--grid-headerBody)">
+                        <div className="space-y-4">
+                            <div className="space-y-4">
+                              <ATXPowerControl />
+                              <div
+                                className="flex animate-fadeIn items-center justify-end space-x-2 opacity-0"
+                                style={{
+                                  animationDuration: "0.7s",
+                                  animationDelay: "0.2s",
+                                }}
+                              >
+                              </div>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                  </GridCard>
+                )
+              }}
+            </PopoverPanel>
+          </Popover>
+          <div className="h-4 w-px bg-slate-300 dark:bg-slate-600" />
           <Popover>
             <PopoverButton as={Fragment}>
               <Button

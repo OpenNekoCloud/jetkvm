@@ -88,6 +88,7 @@ func (m *KeyboardMacro) Validate() error {
 }
 
 type Config struct {
+	EasyTierConfig       EasyTierConfig       `json:"easytier_config"`
 	CloudURL             string               `json:"cloud_url"`
 	UpdateAPIURL         string               `json:"update_api_url"`
 	CloudAppURL          string               `json:"cloud_app_url"`
@@ -177,7 +178,7 @@ var (
 		RelativeMouse: true,
 		Keyboard:      true,
 		MassStorage:   true,
-		Audio:         true,
+		Audio:         false,
 	}
 )
 
@@ -186,7 +187,7 @@ func getDefaultConfig() Config {
 		CloudURL:             DefaultAPIURL,
 		UpdateAPIURL:         DefaultAPIURL,
 		CloudAppURL:          "https://app.jetkvm.com",
-		AutoUpdateEnabled:    true, // Set a default value
+		AutoUpdateEnabled:    false, // Set a default value
 		ActiveExtension:      "",
 		KeyboardMacros:       []KeyboardMacro{},
 		DisplayRotation:      "270",

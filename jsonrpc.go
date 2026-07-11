@@ -353,17 +353,23 @@ func rpcSetBacklightSettings(params BacklightSettings) error {
 		return fmt.Errorf("failed to save config: %w", err)
 	}
 
+	if blConfig.MaxBrightness > 0 {
+		if err := os.Rename("/etc/init.d/bakS10nc-oled", "/etc/init.d/S10nc-oled"); err != nil {
+			return fmt.Errorf("/etc/init.d/bakS10nc-oled missing")
+		}
+		if err := exec.Command("/etc/init.d/S10nc-oled", "start").Run(); err != nil {
+			return fmt.Errorf("error starting S10nc-oled: %w", err)
+		}
+	} else {
+		if err := exec.Command("/etc/init.d/S10nc-oled", "stop").Run(); err != nil {
+			return fmt.Errorf("error stopping S10nc-oled: %w", err)
+		}
+		if err := os.Rename("/etc/init.d/S10nc-oled", "/etc/init.d/bakS10nc-oled"); err != nil {
+			return fmt.Errorf("/etc/init.d/S10nc-oled missing")
+		}
+	}
+
 	logger.Info().Int("max_brightness", config.DisplayMaxBrightness).Int("dim_after", config.DisplayDimAfterSec).Int("off_after", config.DisplayOffAfterSec).Msg("rpc: display: settings applied")
-
-	// If the device started up with auto-dim and/or auto-off set to zero, the display init
-	// method will not have started the tickers. So in case that has changed, attempt to start the tickers now.
-	startBacklightTickers()
-
-	// Wake the display after the settings are altered, this ensures the tickers
-	// are reset to the new settings, and will bring the display up to maxBrightness.
-	// Calling with force set to true, to ignore the current state of the display, and force
-	// it to reset the tickers.
-	wakeDisplay(true, "backlight_settings_changed")
 	return nil
 }
 
@@ -772,18 +778,8 @@ var factoryResetPaths = []string{
 func rpcFactoryReset() error {
 	logger.Info().Msg("Factory reset initiated, removing all user data")
 
-	var errs []error
-	for _, path := range factoryResetPaths {
-		if err := os.RemoveAll(path); err != nil {
-			logger.Warn().Err(err).Str("path", path).Msg("failed to remove path during factory reset")
-			errs = append(errs, err)
-		}
-	}
-
-	if len(errs) > 0 {
-		logger.Warn().Int("errors", len(errs)).Msg("factory reset completed with errors, rebooting anyway")
-	} else {
-		logger.Info().Msg("Factory reset complete, rebooting device")
+	if err := os.Remove("/boot/.partition_done"); err != nil {
+		logger.Warn().Err(err).Msg("factory reset completed with error, rebooting anyway")
 	}
 
 	// Reboot asynchronously to allow the RPC response to be sent first.
@@ -884,8 +880,8 @@ type ATXState struct {
 
 func rpcGetATXState() (ATXState, error) {
 	state := ATXState{
-		Power: ledPWRState.Load(),
-		HDD:   ledHDDState.Load(),
+		Power: atxPowerLedStatus,
+		HDD:   atxHddLedStatus,
 	}
 	return state, nil
 }
@@ -1432,6 +1428,9 @@ var rpcHandlers = map[string]RPCHandler{
 	"emitTestLog":                {Func: rpcEmitTestLog, Params: []string{"level"}},
 	"getPublicIPAddresses":       {Func: rpcGetPublicIPAddresses, Params: []string{"refresh"}},
 	"checkPublicIPAddresses":     {Func: rpcCheckPublicIPAddresses},
+	"getEasyTierState":           {Func: rpcGetEasyTierState},
+	"getEasyTierConfig":          {Func: rpcGetEasyTierConfig},
+	"setEasyTierConfig":          {Func: rpcSetEasyTierConfig, Params: []string{"easyTierEnabled", "easyTierPublicServer", "easyTierNetworkName", "easyTierNetworkSecret", "easyTierVirtualIPv4", "easyTierVirtualHostname", "easyTierSubnetProxyCIDR"}},
 	"getTailscaleStatus":         {Func: rpcGetTailscaleStatus},
 	"getTailscaleControlURL":     {Func: rpcGetTailscaleControlURL},
 	"setTailscaleControlURL":     {Func: rpcSetTailscaleControlURL, Params: []string{"controlURL"}},
